@@ -1,0 +1,109 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpine Weather</title>
+
+    <style></style>
+
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+
+
+
+        async function getWeather(city){
+            console.log(`Debug: Cidade buscada ${city}`)
+
+
+            try{
+            let dataCity = await(fetch(`https://wttr.in/${city}?format=j1`)).then((res) => res.json())
+            
+            // return dataCity['current_condition'][0]['FeelsLikeC']
+
+
+            // Formatar os dados como um array, atraves de "[ ]"
+            let dataCityForm = 
+                [
+                true,
+                dataCity['current_condition'][0]['temp_C'], 
+                dataCity['current_condition'][0]['precipMM'],
+                dataCity['current_condition'][0]['weatherDesc'][0]['value'],
+                dataCity['current_condition'][0]['windspeedKmph'],
+                ]   
+
+            return dataCityForm
+            
+            }
+
+            catch(err){
+                console.log(err)
+                dataCityForm = [false]
+                return dataCityForm
+            }
+                    // console.log(dataCity['current_condition'][0]['FeelsLikeC'])
+
+                    // .then(res => {return res})
+                    
+                        // var dataCity = [
+                        //     {},
+                        //     {},
+
+                        // ]
+
+                    // console.log(dataCity)
+
+            
+        }
+
+    </script>
+
+</head>
+<body>
+    
+    <div x-data='{ setCityData: " ", visible: false, errStat: " "}'>
+        <h2 class="text-xl mt-20 font-semibold text-center" >Digite abaixo uma cidade para consultar o clima</h2>
+
+
+        <div class=" flex gap-x-5 items-center justify-center mt-5 scale-[0.8] md:scale-[1] ">
+            <input class="bg-gray-200 p-1 rounded-md border-gray-200 border-1 shadow-inner h-10 " 
+                    type="text" x-ref="city"></input>
+            <button class="p-1 rounded-md border-gray-500 border-2 font-semibold shadow-md" 
+                    x-on:click='setCityData = await(getWeather($refs.city.value)) 
+                            visible = true
+                            errStat = setCityData[0]'>Buscar</button> 
+            <!-- OBS: Usar o await ao chamar a funcao e aderecar o conteudo do setCitiData por posicao de index -->
+
+
+            <!--  DEBUG -->
+            
+            <!-- <button class="bg-gray-200 p-1 rounded-md border-gray-500 border-2 font-semibold shadow-md" 
+                    x-on:click="console.log(errStat)">Debug</button> -->
+        
+        
+            </div>
+
+        <div class="flex gap items-center justify-center mt-10 bg-gray-100 w-48 p-2 ml-auto mr-auto rounded-lg shadow-lg" 
+            x-show="visible">
+
+            <template x-if="errStat">
+                <div id="success">
+                <p>Temperatura: <span class="font-semibold" x-text="setCityData[1]"></span> °C</p>
+                <p>Chuva: <span class="font-semibold" x-text="setCityData[2]"></span> mm</p>
+                <p>Clima: <span class="font-semibold" x-text="setCityData[3]"></span></p>
+                <p>Ventos: <span class="font-semibold" x-text="setCityData[4]"></span> Km/h</p>
+                </div>
+            </template>
+
+            <template x-if="!errStat">
+                <div id="error">
+                    <p>Erro ao buscar informacao, tente novamente mais tarde.</p>
+                </div>
+            </template>
+        </div>
+    </div>
+    
+
+</body>
+</html>
